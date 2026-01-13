@@ -30,8 +30,8 @@
         #side-panel {
             position: fixed;
             top: 15px;
-            right: -350px;
-            width: 310px;
+            right: -450px;
+            width: 400px;
             max-height: calc(100vh - 30px);
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px) saturate(180%);
@@ -537,16 +537,17 @@
                 keys.push(photoKey);
             }
 
-            // Select random real property images
-            var propertyImages = [
-                'MC1-19.jpg', 'MC1-21.jpg', 'MC1-213-D.jpg',
-                'MC1-67.jpg', 'MC1-945-A.jpg', 'MC1-968-B.jpg', 'MC8-220-D.jpg'
-            ];
-            var randomImg1 = propertyImages[Math.floor(Math.random() * propertyImages.length)];
-            var randomImg2 = propertyImages[Math.floor(Math.random() * propertyImages.length)];
+            // Categorized real property images
+            var photoImages = ['MC1-945-A.jpg', 'MC1-968-B.jpg'];
+            var planImages = ['MC1-213-D.jpg', 'MC2-4.jpg', 'MC2-8.jpg', 'MC7-9.jpg', 'MC8-220-D.jpg'];
 
-            var photoSrc = '../property_images/' + randomImg1;
-            var planSrc = '../property_images/' + randomImg2;
+            // Stable selection based on property number or feature ID if available, otherwise random within category
+            var seed = propNo ? propNo.length : (feature.id || Math.floor(Math.random() * 100));
+            var photoImg = photoImages[seed % photoImages.length];
+            var planImg = planImages[seed % planImages.length];
+
+            var photoSrc = '../property_images/' + photoImg;
+            var planSrc = '../property_images/' + planImg;
 
             // Render loop
             keys.forEach(function (key) {
@@ -2022,6 +2023,7 @@
                 } else {
                     console.warn('Layer not found in allLayers:', layerId, 'Available:', Object.keys(allLayers));
                 }
+                emitLayerState();
             }
 
             if (event.data && event.data.type === 'updateLayerVisibility') {
@@ -2054,6 +2056,7 @@
                         }
                     });
                 }
+                emitLayerState();
             }
 
             if (event.data && event.data.type === 'highlightLayers' && Array.isArray(event.data.layerIds)) {

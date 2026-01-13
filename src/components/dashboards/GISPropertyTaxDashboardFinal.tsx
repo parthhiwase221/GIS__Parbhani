@@ -656,15 +656,15 @@ export function GISPropertyTaxDashboardFinal({ onBack }: GISPropertyTaxDashboard
 
   // Layer Statistical Weights (Mocked for realism)
   const layerWeights = {
-    // MPMS PROPERTY
-    'layer__11': { assets: 124, movable: 45, fixed: 79, value: 1250000 }, // Toilets
-    'layer__10': { assets: 18, movable: 5, fixed: 13, value: 8500000 },  // Hospital
-    'layer__9': { assets: 45, movable: 0, fixed: 45, value: 4200000 },   // Gardens
-    'layer__8': { assets: 320, movable: 0, fixed: 320, value: 15600000 }, // Open Space
-    'layer__7': { assets: 85, movable: 20, fixed: 65, value: 24500000 }, // Buildings
-    'layer__6': { assets: 56, movable: 12, fixed: 44, value: 18400000 }, // Schools
+    // MPMS PROPERTY (Ward/Toilets/Hospitals)
+    'layer__11': { assets: 48, movable: 22, fixed: 26, value: 1250000 },
+    'layer__10': { assets: 12, movable: 4, fixed: 8, value: 8500000 },
+    'layer__9': { assets: 25, movable: 0, fixed: 25, value: 4200000 },
+    'layer__8': { assets: 80, movable: 0, fixed: 80, value: 15600000 },
+    'layer__7': { assets: 145, movable: 35, fixed: 110, value: 24500000 },
+    'layer__6': { assets: 56, movable: 12, fixed: 44, value: 18400000 },
 
-    // Sectors / Land Use (Base values per layer)
+    // Sectors / Land Use / Infrastructure
     'layer_RESIDENTIAL_3': { assets: 540, movable: 480, fixed: 60, value: 45000000 },
     'layer_RESERVATION_4': { assets: 85, movable: 0, fixed: 85, value: 12000000 },
     'layer_ROAD_2': { assets: 120, movable: 80, fixed: 40, value: 3500000 },
@@ -673,16 +673,18 @@ export function GISPropertyTaxDashboardFinal({ onBack }: GISPropertyTaxDashboard
     'layer_ProposeLandUse_0': { assets: 180, movable: 50, fixed: 130, value: 15000000 },
   };
 
-  // Base constant values to ensure we always have some data
-  const BASE_STATS = { assets: 1800, movable: 240, fixed: 320, value: 45000000 };
+  // Minimal base values to ensure we always have some reference context
+  const BASE_STATS = { assets: 0, movable: 0, fixed: 0, value: 0 };
 
-  // Calculate live numbers from visible layers
+  // Calculate live numbers from visible layers directly from React state
   const calculateDynamicStats = () => {
-    // If no layers are active, show a baseline or empty
-    if (activeLayerIds.length === 0) return BASE_STATS;
+    const activeIds = Object.keys(qgisLayers).filter(id => qgisLayers[id]);
 
-    return activeLayerIds.reduce((acc, id) => {
-      const weight = layerWeights[id as keyof typeof layerWeights] || { assets: 45, movable: 20, fixed: 25, value: 1200000 };
+    // If no layers are active, show zeros (per user request to show real changes)
+    if (activeIds.length === 0) return { assets: 0, movable: 0, fixed: 0, value: 0, activeCount: 0 };
+
+    const stats = activeIds.reduce((acc, id) => {
+      const weight = layerWeights[id as keyof typeof layerWeights] || { assets: 15, movable: 5, fixed: 10, value: 500000 };
       return {
         assets: acc.assets + weight.assets,
         movable: acc.movable + weight.movable,
@@ -690,6 +692,8 @@ export function GISPropertyTaxDashboardFinal({ onBack }: GISPropertyTaxDashboard
         value: acc.value + weight.value
       };
     }, { assets: 0, movable: 0, fixed: 0, value: 0 });
+
+    return { ...stats, activeCount: activeIds.length };
   };
 
   const dynamicStats = calculateDynamicStats();
@@ -707,7 +711,7 @@ export function GISPropertyTaxDashboardFinal({ onBack }: GISPropertyTaxDashboard
     {
       label: 'Movable Assets',
       value: dynamicStats.movable.toLocaleString('en-IN'),
-      subtext: `${activeLayerIds.length} active layers`,
+      subtext: `${dynamicStats.activeCount} active layers`,
       progress: Math.round((dynamicStats.movable / dynamicStats.assets) * 100) || 0,
       icon: Target,
       color: theme.success
@@ -962,7 +966,7 @@ export function GISPropertyTaxDashboardFinal({ onBack }: GISPropertyTaxDashboard
 
               <div>
                 <h1 className="text-base font-bold" style={{ color: theme.textPrimary }}>
-                  Municipal GIS - Property Tax Dashboard
+                  Municipal GIS - Asset Management Dashboard
                 </h1>
                 <div className="flex items-center gap-2">
                   <p className="text-xs" style={{ color: theme.textSecondary }}>

@@ -2103,23 +2103,17 @@
                     }
                 });
             }
-
-            // Ensure map always shows full extent - don't auto-zoom when layers are toggled
-            // The map should maintain the full bounds view set by setBounds()
-            if (event.data && (event.data.type === 'toggleLayer' || event.data.type === 'highlightLayers')) {
-                // Prevent Leaflet from auto-fitting bounds when layers are added
-                // We want to keep the full map view, not zoom to individual layers
-                // The setBounds() function handles showing the full extent
+            if (event.data && event.data.type === 'requestSync') {
+                console.log('Received requestSync, emitting current state');
+                emitLayerState();
             }
         });
 
-        // Notify parent that map is ready
-        setTimeout(function () {
-            if (window.parent) {
-                window.parent.postMessage({ type: 'mapReady' }, '*');
-                console.log('Map ready message sent');
-            }
-        }, 2000);
+        // Notify parent that map is ready immediately
+        if (window.parent) {
+            window.parent.postMessage({ type: 'mapReady' }, '*');
+            console.log('Map ready message sent');
+        }
         function emitLayerState() {
             var activeLayerIds = [];
             Object.keys(allLayers).forEach(function (id) {

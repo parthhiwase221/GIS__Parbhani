@@ -297,6 +297,12 @@ export function GISPropertyTaxDashboardFinal({ onBack }: GISPropertyTaxDashboard
   const [qgisLayers, setQgisLayers] = useState<Record<string, boolean>>(initialLayersState);
   const [isMapReady, setIsMapReady] = useState(false);
 
+  // Keep a ref of qgisLayers for stable access in event listeners
+  const qgisLayersRef = useRef(qgisLayers);
+  useEffect(() => {
+    qgisLayersRef.current = qgisLayers;
+  }, [qgisLayers]);
+
 
 
   // Get filtered layers based on selected property type
@@ -523,6 +529,10 @@ export function GISPropertyTaxDashboardFinal({ onBack }: GISPropertyTaxDashboard
       if (event.data && event.data.type === 'mapReady') {
         console.log('Map is ready, syncing layers');
         setIsMapReady(true);
+        // Sync all layers immediately when map is ready
+        const currentLayers = qgisLayersRef.current;
+        const updates = Object.entries(currentLayers).map(([id, visible]) => ({ id, visible }));
+        sendLayerVisibilityUpdateMessage(updates);
       }
       if (event.data && event.data.type === 'layerStateUpdate') {
         console.log('Received layerStateUpdate:', event.data.activeLayerIds);
@@ -549,19 +559,17 @@ export function GISPropertyTaxDashboardFinal({ onBack }: GISPropertyTaxDashboard
 
   // Sync layer states when component mounts or iframe loads
   useEffect(() => {
-    // Wait for iframe to load, then sync all layer states
     const iframe = mapIframeRef.current;
     if (iframe) {
       const handleLoad = () => {
-        // Longer delay to ensure map is fully initialized
-        setTimeout(() => {
-          Object.entries(qgisLayers).forEach(([layerId, visible]) => {
-            sendLayerToggleMessage(layerId, Boolean(visible));
-          });
-        }, 2000);
+        // Instead of a long delay, we send a requestSync message
+        // This prompts the iframe to send its state if it missed the initial mapReady handshake
+        console.log('Iframe loaded, requesting sync');
+        if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'requestSync' }, '*');
+        }
       };
 
-      // If iframe is already loaded, sync immediately
       if (iframe.contentDocument?.readyState === 'complete') {
         handleLoad();
       } else {
@@ -569,7 +577,6 @@ export function GISPropertyTaxDashboardFinal({ onBack }: GISPropertyTaxDashboard
         return () => iframe.removeEventListener('load', handleLoad);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
 
   // Simulated live update

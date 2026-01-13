@@ -19,7 +19,9 @@ const QGISMapView = React.memo(React.forwardRef<HTMLIFrameElement, QGISMapViewPr
                     top: 0,
                     left: 0,
                     right: 0,
-                    bottom: 0
+                    bottom: 0,
+                    background: "#0f172a", // Match dashboard theme
+                    transition: "opacity 0.5s ease"
                 }}
                 title="QGIS-Map"
                 allowFullScreen

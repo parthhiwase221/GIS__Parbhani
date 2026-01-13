@@ -538,8 +538,8 @@
             }
 
             // Categorized real property images
-            var photoImages = ['MC1-945-A.jpg', 'MC1-968-B.jpg'];
-            var planImages = ['MC1-213-D.jpg', 'MC2-4.jpg', 'MC2-8.jpg', 'MC7-9.jpg', 'MC8-220-D.jpg'];
+            var photoImages = ['MC1-12-A.jpg', 'MC1-15-A.jpg', 'MC1-16-A - Copy.jpg', 'MC1-945-A.jpg', 'MC1-968-B.jpg'];
+            var planImages = ['image (1).png', 'image (2).png', 'image (3).png', 'image (4).png', 'image (5).png'];
 
             // Stable selection based on property number or feature ID if available, otherwise random within category
             var seed = propNo ? propNo.length : (feature.id || Math.floor(Math.random() * 100));
@@ -564,20 +564,20 @@
                             <!-- Photo Preview -->
                             <div class="img-preview-container">
                                 <span class="img-label">Photo</span>
-                                <div class="img-box top-tooltip" data-tip="Click Eye to View">
+                                <div class="img-box photo-box top-tooltip" data-tip="Click Eye to View">
                                     <img src="${photoSrc}" alt="Prop Photo">
                                     <button class="btn-eye" onclick="openImageModal('${photoSrc}')" title="View Photo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                                     </button>
                                 </div>
                             </div>
                             <!-- Plan Preview -->
                             <div class="img-preview-container">
                                 <span class="img-label">Plan</span>
-                                <div class="img-box">
+                                <div class="img-box plan-box">
                                     <img src="${planSrc}" alt="Prop Plan">
                                     <button class="btn-eye" onclick="openImageModal('${planSrc}')" title="View Plan">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                                     </button>
                                 </div>
                             </div>
@@ -1784,22 +1784,27 @@
                 }
                 .img-box {
                     position: relative;
-                    width: 44px;
-                    height: 44px;
-                    border-radius: 8px;
+                    width: 120px;
+                    height: 120px;
+                    border-radius: 12px;
                     overflow: hidden;
-                    border: 1px solid rgba(0, 243, 255, 0.3);
-                    background: rgba(0,0,0,0.2);
-                    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                    border: 1px solid rgba(0, 243, 255, 0.4);
+                    background: #fff; /* High contrast background for plans */
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
                 }
                 .img-box img {
                     width: 100%;
                     height: 100%;
-                    object-fit: cover;
+                    object-fit: contain; /* Ensure full plan is visible */
                     transition: transform 0.3s ease;
+                    image-rendering: -webkit-optimize-contrast; /* Sharpen lines */
+                    image-rendering: crisp-edges;
+                }
+                .img-box.photo-box img {
+                    object-fit: cover; /* Photos look better as cover */
                 }
                 .img-box:hover img {
-                    transform: scale(1.1);
+                    transform: scale(1.05);
                 }
                 .btn-eye {
                     position: absolute;
